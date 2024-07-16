@@ -816,6 +816,17 @@ class PretrainingDataset(TrainingDataset):
         )
 
         return cls(dir_path=save_dir, tokenizer=tokenizer)
+# Function to replace _get_combined_mididict in finetuningdataset for midi2midi
+def _get_concatenated_mididict(
+    clean_midi_dict: MidiDict,
+    noisy_midi_dict: MidiDict,
+):
+    noisy_seq = AbsTokenizer._tokenize_midi_dict(noisy_midi_dict)
+    clean_seq = AbsTokenizer._tokenize_midi_dict(clean_midi_dict)
+    comb_seq = clean_seq + "<sep>" + noisy_seq
+    comb_midi_dict = AbsTokenizer._detokenize_midi_dict(comb_seq)
+    return comb_midi_dict
+	
 
 
 # TODO: Improve this logic so it supports MIDI files with multiple tempo_msgs
@@ -1111,14 +1122,7 @@ def _get_mixed_dataset(
             noisy = _noise_midi_dict(noisy, config=finetuning_config["noising"])
 
         comb_midi_dicts.append(
-            _get_combined_mididict(
-                clean,
-                noisy,
-                min_noisy_ms=MIN_NOISY_MS,
-                max_noisy_ms=MAX_NOISY_MS,
-                min_clean_ms=MIN_CLEAN_MS,
-                max_clean_ms=MAX_CLEAN_MS,
-            )
+            _get_concatenated_mididict(clean, noisy)
         )
 
     return MidiDataset(comb_midi_dicts)
