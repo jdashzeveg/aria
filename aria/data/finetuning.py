@@ -25,7 +25,7 @@ def midi_to_json(midi_folder_path, save_path):
 	for file in files:
 	    file_path = os.path.join(root, file)
 	    try:
-	       If os.path.isfile(file_path):
+	       If os.path.isfile(file_path) and file_path.endswith('.mid'):
 	          midi_dict = MidiDict.from_midi(file_path)
 	    except Exception as e:
 	       print(f"Error processing file {file_path}: {e}")
