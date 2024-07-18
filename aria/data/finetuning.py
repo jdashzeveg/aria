@@ -9,7 +9,7 @@ from multiprocessing import Pool, get_start_method
 from aria.config import load_config
 from aria.tokenizer import Tokenizer, SeparatedAbsTokenizer
 from aria.data.midi import MidiDict
-from aria.data.datasets import MidiDataset
+from aria.data.datasets import MidiDataset, FinetuningDataset
 
 def midi_to_json(midi_folder_path, save_path):
 	#store mididicts into one dict
@@ -30,5 +30,18 @@ def midi_to_json(midi_folder_path, save_path):
 				print(f"Error processing file {file_path}: {e}")
 	#create a mididataset from the mididicts
 	dataset = MidiDataset.__init__(all_midi_dicts)
-	#save it to a json file
-	MidiDataset.save(dataset, save_path)
+	#save it to a jsonl file
+	jsonl = MidiDataset.save(dataset, save_path)
+	#return the jsonl file
+	return jsonl
+
+def split(jsonl, ratio):
+	#split into train/val, ratio: 0.8
+	dir_path = MidiDataset.split_from_file(jsonl, ratio)
+	return dir_path
+
+def finetuning(dir_path, tokenizer):
+	#finetuning: args: the mididataset, tokenizer
+	FinetuningDataset.__init__(dir_path, tokenizer)
+	#build args: tokenizer, dir in which to save the build, max_seq_len, num_epochs, clean path, noisy path
+	FinetuningDataset.build()
